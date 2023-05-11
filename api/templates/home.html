@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<section class="container-fluid">
+<div class="mb-3">
+    <h3 class="text-center text-uppercase">Covid 19 live updates from the world</h3>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-striped text-center" id="tbval">
+        <tr>
+            <th>Country</th>
+            <th>TotalConfirmed</th>
+            <th>TotalRecovered</th>
+            <th>TotalDeaths</th>
+            <th>NewConfirmed</th>
+            <th>NewRecovered</th>
+            <th>NewDeaths</th>
+        </tr>
+    </table>
+</div>
+</section>
+
+
+{% endblock %}
