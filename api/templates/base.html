@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +11,11 @@
     <title>Covid Tracker</title>
 </head>
 <body onload="fetch()">
+
+    <!-- ======= Header ======= -->
+    {% include 'navbar.html' %}
+    <!-- End Header -->
+
     {% block content %}
 
     {% endblock %}
@@ -17,47 +24,61 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
     function fetch(){
-        $.get("https://api.apify.com/v2/key-value-stores/SmuuI0oebnTWjRTUh/records/LATEST?disableRedirect=true", 
-        
+        // $.get("https://api.apify.com/v2/key-value-stores/SmuuI0oebnTWjRTUh/records/LATEST?disableRedirect=true", 
+        $.getJSON('{% static "Covid_data.json" %}',
             function(data){
-                // console.log(data['regionData'].length);
+                console.log(data.length);
                 var tbval = document.getElementById('tbval');
+                // Variable to track the number of visible rows
+                var  visibleRows = 15;
 
-                for(var i=1; i<(data['regionData'].length); i++){
+                
+                for(var i=1; i<data.length && i <= visibleRows; i++){
                     
                     var x = tbval.insertRow();
                     x.insertCell(0);
 
-                    tbval.rows[i].cells[0].innerHTML = data['regionData'][i-1]['country'];
+                    tbval.rows[i].cells[0].innerHTML = data[i]['Country,Other'];
                     tbval.rows[i].cells[0].style.background = "#7a4a91";
                     tbval.rows[i].cells[0].style.color = "#fff";
 
                     x.insertCell(1);
-                    tbval.rows[i].cells[1].innerHTML = data['regionData'][i-1]['totalCases'];
+                    tbval.rows[i].cells[1].innerHTML = data[i]['TotalCases'];
                     tbval.rows[i].cells[1].style.background = "#4bb7d8";
 
                     x.insertCell(2);
-                    tbval.rows[i].cells[2].innerHTML = data['regionData'][i-1]['totalRecovered'];
+                    tbval.rows[i].cells[2].innerHTML = data[i]['TotalRecovered'];
                     tbval.rows[i].cells[2].style.background = "#4bb7d8";
 
                     x.insertCell(3);
-                    tbval.rows[i].cells[3].innerHTML = data['regionData'][i-1]['totalDeaths'];
+                    tbval.rows[i].cells[3].innerHTML = data[i]['TotalDeaths'];
                     tbval.rows[i].cells[3].style.background = "#f36e23";
 
                     x.insertCell(4);
-                    tbval.rows[i].cells[4].innerHTML = data['regionData'][i-1]['newCases'];
+                    tbval.rows[i].cells[4].innerHTML = data[i]['NewCases'];
                     tbval.rows[i].cells[4].style.background = "#4bb7d8";
 
                     x.insertCell(5);
-                    tbval.rows[i].cells[5].innerHTML = data['regionData'][i-1]['newRecovered'];
+                    tbval.rows[i].cells[5].innerHTML = data[i]['NewRecovered'];
                     tbval.rows[i].cells[5].style.background = "#9cc850";
 
                     x.insertCell(6);
-                    tbval.rows[i].cells[6].innerHTML = data['regionData'][i-1]['newDeaths'];
+                    tbval.rows[i].cells[6].innerHTML = data[i]['NewDeaths'];
                     tbval.rows[i].cells[6].style.background = "#f36e23";
                  
                 }
+                // hide rows after the visible rows
+                for (var j = visibleRows + 1; j < data.length; j++) {
+                    tbval.rows[j].style.display = 'none';
+                }
+                $('#showMoreBtn').click(function() {
+                    for (var k = visibleRows + 1; k < data.length; k++) {
+                        tbval.rows[k].style.display = 'table-row';
+                    }
+                    $('#showMoreBtn').hide();
+                });
             }
+           
         );
     }
 </script>
