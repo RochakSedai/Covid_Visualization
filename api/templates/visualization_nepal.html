@@ -17,16 +17,23 @@
       text-align: center;
     }
 </style>    
+<h1 style="text-align: center; color: crimson;" class="mt-5">Visualization Of Nepal</h1>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 center">
+        <h2 class="display-6">Coronavirus Cases</h2>
+        <p style="font-size: 50px; font-weight: bold; color: darkgray;">{{coronavirus_cases}}</p>
 
-<div class="container center">
-    <h2 class="display-6">Coronavirus Cases</h2>
-    <p style="font-size: 50px; font-weight: bold; color: darkgray;">{{coronavirus_cases}}</p>
-
-    <h2 class="display-6">Deaths</h2>
-    <p style="font-size: 50px; font-weight: bold; color: black;">{{Deaths}}</p>
-    
-    <h2 class="display-6">Recovered</h2>
-    <p style="font-size: 50px; font-weight: bold; color: lawngreen;">{{Recovered}}</p>
+        <h2 class="display-6">Deaths</h2>
+        <p style="font-size: 50px; font-weight: bold; color: black;">{{Deaths}}</p>
+        
+        <h2 class="display-6">Recovered</h2>
+        <p style="font-size: 50px; font-weight: bold; color: lawngreen;">{{Recovered}}</p>
+      </div>
+      <div class="col-md-6">
+        <img src="{% static 'line-chart.png' %}" class="img-fluid" alt="Image 1">
+      </div>
+    </div>
   </div>
 
 {% endblock %}

@@ -250,12 +250,25 @@ def visualize_nepal(request):
     actual_value_str = covid_dict['Coronavirus Cases']
     actual_value = int(actual_value_str.replace(',', '').strip())
 
-    covid_data = [actual_value]
+    covid_data_nepal = [actual_value]
     for value in values:
         actual_value -= value
-        covid_data.append(actual_value)
+        covid_data_nepal.append(actual_value)
 
-    print(covid_data)
+    print(covid_data_nepal)
+    # Convert the dates to datetime objects
+    converted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in dates]
+
+    # Plot the curve
+    plt.plot(converted_dates, covid_data_nepal)
+    plt.xlabel('Date')
+    plt.ylabel('COVID Total Cases')
+    plt.title('Line-Graph of total cases of past-7 days')
+    plt.xticks(rotation=45)
+    plt.savefig('api/static/line-chart.png', dpi=300)
+    plt.show()
+
+
 
     context = {
         "coronavirus_cases": covid_dict['Coronavirus Cases'],
