@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import geopy
 import folium
 from folium import plugins
+from datetime import datetime, timedelta
 
 # Create your views here.
 def home(request):
@@ -172,6 +173,7 @@ def visualize_world(request):
 
 
 def world_heatmap(request):
+
     data = pd.read_csv('Covid_data.csv')
 
     # Drop the second row
@@ -199,3 +201,67 @@ def world_heatmap(request):
     map_heatmap.save('api/templates/heatmap.html')
     
     return render(request, 'heatmap.html')
+
+
+
+def visualize_nepal(request):
+
+    url = "https://www.worldometers.info/coronavirus/country/nepal/"
+    data = requests.get(url)
+    soup = BeautifulSoup(data.text,'html5lib')
+
+    covid_dict = {}
+    div = soup.find_all("div", {"id": "maincounter-wrap"})
+    for i in div:
+        content_div = i.find("div",{"class":"maincounter-number"})
+        if content_div is not None:
+            h1_tag = i.find("h1")
+            if h1_tag is not None:
+                key = h1_tag.text.replace(":", "").strip()
+                value = content_div.find("span").text.strip()
+                covid_dict[key] = value
+    print(covid_dict)
+
+
+
+    updates = soup.find_all('div', {"class": "news_post"})
+
+    values = []
+    for update in updates:
+        strong_tags = update.find('strong')
+        for tag in strong_tags:
+            value = int(tag.get_text().split()[0]) 
+            values.append(value)
+    
+    print(values)
+
+    # Get the current date
+    today = datetime.now().date()
+
+    # Calculate the dates of the past 8 days
+    dates = []
+    for i in range(8):
+        delta = timedelta(days=i)
+        date = today - delta
+        dates.append(date.strftime('%Y-%m-%d'))
+
+    print(dates)
+
+    actual_value_str = covid_dict['Coronavirus Cases']
+    actual_value = int(actual_value_str.replace(',', '').strip())
+
+    covid_data = [actual_value]
+    for value in values:
+        actual_value -= value
+        covid_data.append(actual_value)
+
+    print(covid_data)
+
+    context = {
+        "coronavirus_cases": covid_dict['Coronavirus Cases'],
+        "Deaths": covid_dict['Deaths'],
+        "Recovered": covid_dict['Recovered']
+    }
+   
+
+    return render(request, 'visualization_nepal.html', context)
