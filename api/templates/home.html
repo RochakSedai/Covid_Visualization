@@ -4,25 +4,39 @@
 
 {% block content %}
 
-<section class="container-fluid">
-<div class="mb-3">
-    <h3 class="text-center text-uppercase">Covid 19 live updates from the world</h3>
+<style>
+    .center {
+      display: flex;
+      flex-direction: column;
+      margin-top: 75px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 50px;
+      /* justify-content: center;
+      align-items: center; */
+      text-align: center;
+    }
+</style>    
+
+<div class="container center">
+    <h2 class="display-6">Coronavirus Cases</h2>
+    <p style="font-size: 50px; font-weight: bold; color: darkgray;">{{coronavirus_cases}}</p>
+
+    <h2 class="display-6">Deaths</h2>
+    <p style="font-size: 50px; font-weight: bold; color: black;">{{Deaths}}</p>
+    
+    <h2 class="display-6">Recovered</h2>
+    <p style="font-size: 50px; font-weight: bold; color: lawngreen;">{{Recovered}}</p>
+  </div>
+
+<div style="margin-left: 500px;">
+    <a href="{% url 'get_table' %}"><button type="button" class="btn btn-primary">Get Tabular Data</button></a>
+    <a href="{% url 'visualize_world' %}"><button type="button" class="btn btn-secondary">Visualize World Data</button></a>
+    <a href=""><button type="button" class="btn btn-success">Visualize Nepal Data</button></a>
 </div>
-<div class="table-responsive" id="tableContainer">
-    <table class="table table-bordered table-striped text-center" id="tbval">
-        <tr>
-            <th>Country</th>
-            <th>TotalConfirmed</th>
-            <th>TotalRecovered</th>
-            <th>TotalDeaths</th>
-            <th>NewConfirmed</th>
-            <th>NewRecovered</th>
-            <th>NewDeaths</th>
-        </tr>
-    </table>
-</div>
-<button class="btn" id="showMoreBtn">Show More</button>
-</section>
+
+
+
 
 
 {% endblock %}

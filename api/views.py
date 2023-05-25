@@ -2,6 +2,11 @@ from django.shortcuts import render
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
+import geopy
+import folium
+from folium import plugins
+
 # Create your views here.
 def home(request):
 
@@ -69,4 +74,128 @@ def home(request):
     # Save JSON data to a file
     with open('/home/sedairochak/Covid_Visualization/covid_tracking/api/static/Covid_data.json', 'w') as f:
         f.write(Covid_json_data)
-    return render(request, 'home.html')
+
+    context = {
+        "coronavirus_cases": covid_dict['Coronavirus Cases'],
+        "Deaths": covid_dict['Deaths'],
+        "Recovered": covid_dict['Recovered']
+    }
+   
+
+    return render(request, 'home.html', context)
+
+
+def get_table(request):
+    return render(request, 'table.html')
+
+def visualize_world(request):
+
+    # Read the CSV file
+    df = pd.read_csv('Covid_data.csv')
+
+    # Drop the second row
+    df = df.drop(0)
+
+    # Remove commas from 'total Deaths' column and convert to float
+    df['TotalCases'] = df['TotalCases'].str.replace(',', '').astype(float)
+    df['TotalDeaths'] = df['TotalDeaths'].str.replace(',', '').astype(float)
+
+    # Sort the DataFrame by total deaths in descending order
+    df_sorted_cases = df.sort_values('TotalCases', ascending=False)
+    df_sorted_deaths = df.sort_values('TotalDeaths', ascending=False)
+
+    # Get the top 10 countries with maximum total deaths
+    top_10_countries_cases = df_sorted_cases['Country,Other'].head(9).tolist()
+    print(top_10_countries_cases)
+    top_10_countries_deaths = df_sorted_deaths['Country,Other'].head(9).tolist()
+    print(top_10_countries_deaths)
+
+    # Calculate the sum of total deaths for the remaining countries
+    other_cases = df_sorted_cases.loc[~df_sorted_cases['Country,Other'].isin(top_10_countries_cases), 'TotalCases'].sum()
+    other_deaths = df_sorted_deaths.loc[~df_sorted_deaths['Country,Other'].isin(top_10_countries_deaths), 'TotalDeaths'].sum()
+
+    # Create a new DataFrame for pie chart data
+    pie_data_cases = pd.Series(df_sorted_cases.loc[df_sorted_cases['Country,Other'].isin(top_10_countries_cases), 'TotalCases'])
+    pie_data_cases = pd.concat([pie_data_cases, pd.Series([other_cases], index=['Other'])])
+
+    pie_data_deaths = pd.Series(df_sorted_deaths.loc[df_sorted_deaths['Country,Other'].isin(top_10_countries_deaths), 'TotalDeaths'])
+    pie_data_deaths = pd.concat([pie_data_deaths, pd.Series([other_deaths], index=['Other'])])
+
+    # Calculate the percentage values
+    percentage_values_cases = pie_data_cases / pie_data_cases.sum() * 100
+    percentage_values_deaths = pie_data_deaths / pie_data_deaths.sum() * 100
+
+
+    # Plot the pie chart for total cases
+    plt.pie(pie_data_cases, labels=None, autopct='%1.1f%%')
+    plt.title('Top 10 Countries with Maximum TotalCases')
+    plt.axis('equal')
+
+    # # Retrieve country names from DataFrame based on index
+    # country_names = [df.loc[df['TotalCases'] == cases, 'Country,Other'].values[0] for cases in pie_data.index]
+    top_10_countries_cases.append('Other')
+
+    # Create the legend labels with country names and percentages
+    legend_labels = [f'{country}: {percentage:.1f}%' for country, percentage in zip(top_10_countries_cases, percentage_values_cases)]
+
+    # Add the legend
+    plt.legend(legend_labels, loc='best')
+
+    # Save the plot as a PNG image file
+    plt.savefig('api/static/TotalCases.png', dpi=300)
+
+    # Display the plot
+    plt.show()
+
+    # Plot the pie chart for total deaths
+    plt.pie(pie_data_deaths, labels=None)
+    plt.title('Top 10 Countries with Maximum TotalDeaths')
+    plt.axis('equal')
+
+    # # Retrieve country names from DataFrame based on index
+    # country_names = [df.loc[df['TotalCases'] == cases, 'Country,Other'].values[0] for cases in pie_data.index]
+    top_10_countries_deaths.append('Other')
+
+    # Create the legend labels with country names and percentages
+    legend_labels = [f'{country}: {percentage:.1f}%' for country, percentage in zip(top_10_countries_deaths, percentage_values_deaths)]
+
+    # Add the legend
+    plt.legend(legend_labels, loc='best')
+
+    # Save the plot as a PNG image file
+    plt.savefig('api/static/TotalDeaths.png', dpi=300)
+
+    # Display the plot
+    plt.show()
+
+    return render(request, 'visualization_world.html')
+
+
+def world_heatmap(request):
+    data = pd.read_csv('Covid_data.csv')
+
+    # Drop the second row
+    data = data.drop(0)
+
+    # Remove commas from 'total Deaths' column and convert to float
+    data['TotalCases'] = data['TotalCases'].str.replace(',', '').astype(float)
+    # df['TotalDeaths'] = df['TotalDeaths'].str.replace(',', '').astype(float)
+
+    # Initialize geocoder
+    geolocator = geopy.geocoders.Nominatim(user_agent='heatmap_plot')
+
+    # Geocode the locations in the dataset
+    data['Location'] = data['Country,Other'].apply(lambda x: geolocator.geocode(x, timeout=10) if x is not None else None)
+    data['Latitude'] = data['Location'].apply(lambda loc: loc.latitude if loc is not None else None)
+    data['Longitude'] = data['Location'].apply(lambda loc: loc.longitude if loc is not None else None)
+
+    # Create a folium map centered on the first location
+    map_heatmap = folium.Map(location=[data['Latitude'].iloc[0], data['Longitude'].iloc[0]], zoom_start=2)
+
+    # Generate heatmap layer
+    heat_data = [[row['Latitude'], row['Longitude'], row['TotalCases']] for index, row in data.iterrows()]
+    plugins.HeatMap(heat_data).add_to(map_heatmap)
+    # Display the map
+    map_heatmap.save('api/templates/heatmap.html')
+    
+    return render(request, 'heatmap.html')

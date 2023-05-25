@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- <div class="card-deck">
+    <div class="card">
+      <img class="card-img-top" src="{% static 'TotalCases.png' %}" style="width: 600px; height: auto;" alt="Card image cap">
+      
+    </div>
+    <div class="card">
+      <img class="card-img-top" src="{% static 'TotalDeaths.png' %}" style="width: 600px; height: auto;" alt="Card image cap">
+
+    </div>
+
+  </div>  -->
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <img src="{% static 'TotalCases.png' %}" class="img-fluid" alt="Image 1">
+      </div>
+      <div class="col-md-6">
+        <img src="{% static 'TotalDeaths.png' %}" class="img-fluid" alt="Image 2">
+      </div>
+      
+    </div>
+  </div>
+<div style="margin-left: 700px; margin-top: 30px;">
+  <a href="{% url 'heatmap' %}"><button class="btn btn-primary">Show in Map</button></a>
+</div>
+
+{% endblock %}
